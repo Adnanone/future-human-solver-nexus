@@ -1,1 +1,5 @@
+
 project_id = "syothuxkimavlcdhzklo"
+
+[functions.generate-paradox-solution]
+verify_jwt = false

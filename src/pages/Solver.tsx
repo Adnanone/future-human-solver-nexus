@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ParadoxNav } from "@/components/paradox-solver/nav-bar";
@@ -11,25 +10,45 @@ const ParadoxSolver = () => {
   const [problemInput, setProblemInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState(0); // 0: input, 1: analyzing, 2: results
-  
-  const handleSubmit = (e: React.FormEvent) => {
+  const [solutionResult, setSolutionResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!problemInput.trim()) return;
-    
+
     setLoading(true);
     setStage(1);
-    
-    // Simulate processing
-    setTimeout(() => {
+    setError(null);
+    setSolutionResult(null);
+
+    try {
+      // Call Supabase Edge Function for solution
+      const response = await fetch(
+        "https://syothuxkimavlcdhzklo.functions.supabase.co/generate-paradox-solution",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: problemInput }),
+        }
+      );
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      // Show Google AI's response
+      setSolutionResult(data.output || "No solution generated.");
       setStage(2);
+    } catch (err: any) {
+      setError(err.message || "Unexpected error");
+      setStage(0);
+    } finally {
       setLoading(false);
-    }, 5000);
+    }
   };
-  
+
   return (
     <div className="min-h-screen bg-cyber-darker text-white">
       <ParadoxNav />
-      
+
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           <motion.div
@@ -73,15 +92,17 @@ const ParadoxSolver = () => {
                       <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-neon-blue animate-pulse-neon" style={{ animationDelay: '1.5s' }} />
                     </div>
                   </div>
-                  
+                  {error && (
+                    <div className="text-red-400 mb-2 text-center">{error}</div>
+                  )}
                   <div className="flex gap-4 justify-end">
-                    <NeuralButton type="submit" disabled={!problemInput.trim()}>
-                      Begin Neural Analysis
+                    <NeuralButton type="submit" disabled={!problemInput.trim() || loading}>
+                      {loading ? "Analyzing..." : "Begin Neural Analysis"}
                     </NeuralButton>
                   </div>
                 </motion.form>
               )}
-              
+
               {stage === 1 && (
                 <motion.div 
                   className="py-12"
@@ -207,7 +228,7 @@ const ParadoxSolver = () => {
                   </div>
                 </motion.div>
               )}
-              
+
               {stage === 2 && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -217,71 +238,19 @@ const ParadoxSolver = () => {
                   <div className="mb-6 text-center">
                     <div className="inline-block mb-4 px-3 py-1 rounded-full bg-neon-blue/10 text-neon-blue text-sm">Analysis Complete</div>
                     <h2 className="text-xl font-bold mb-1 text-white">Solution Paradigms Discovered</h2>
-                    <p className="text-gray-400 text-sm mb-8">
-                      Our neural system has identified 3 solution paths invisible to conventional human thinking.
-                    </p>
                   </div>
-                  
-                  <div className="grid md:grid-cols-3 gap-6 mb-8">
-                    {[
-                      {
-                        title: "Reverse Framework Solution",
-                        description: "By inverting your core assumptions, a previously invisible solution path emerges through the concept of anti-positioning.",
-                        confidence: 87,
-                        color: "blue",
-                      },
-                      {
-                        title: "Multi-Paradigm Integration",
-                        description: "Combining three seemingly unrelated conceptual models reveals a synergistic solution that transcends traditional boundaries.",
-                        confidence: 93,
-                        color: "purple",
-                      },
-                      {
-                        title: "Temporal Perspective Shift",
-                        description: "Reconfiguring your time horizon parameters creates a novel solution by neutralizing immediate constraint biases.",
-                        confidence: 79,
-                        color: "cyan",
-                      }
-                    ].map((solution, index) => (
-                      <HologramCard 
-                        key={index} 
-                        className="h-full"
-                        intensity={solution.confidence > 90 ? "high" : "medium"}
-                      >
-                        <div className="flex flex-col h-full">
-                          <div className={`text-neon-${solution.color} mb-2 font-bold flex items-center justify-between`}>
-                            <span>{solution.title}</span>
-                            <span className="text-sm">{solution.confidence}%</span>
-                          </div>
-                          
-                          <p className="text-gray-300 text-sm mb-4 flex-grow">{solution.description}</p>
-                          
-                          {/* Progress bar */}
-                          <div className="w-full h-1 bg-cyber-darker rounded overflow-hidden">
-                            <motion.div
-                              className={`h-full bg-neon-${solution.color}`}
-                              initial={{ width: "0%" }}
-                              animate={{ width: `${solution.confidence}%` }}
-                              transition={{ duration: 1, ease: "easeOut" }}
-                            />
-                          </div>
-                        </div>
-                      </HologramCard>
-                    ))}
+                  <div className="mb-6 bg-cyber-dark/70 rounded p-4 text-gray-200 whitespace-pre-line text-sm">
+                    {solutionResult || "No solution generated."}
                   </div>
-                  
                   <div className="flex gap-4 justify-center">
-                    <NeuralButton onClick={() => setStage(0)} variant="outline" color="cyan">
+                    <NeuralButton onClick={() => { setStage(0); setProblemInput(""); setSolutionResult(null); setError(null); }} variant="outline" color="cyan">
                       Start New Analysis
-                    </NeuralButton>
-                    <NeuralButton color="blue">
-                      Full Solution Details
                     </NeuralButton>
                   </div>
                 </motion.div>
               )}
             </HologramCard>
-            
+
             {/* Additional info */}
             <div className="grid md:grid-cols-3 gap-6">
               <HologramCard className="p-4" cardType="glass">
