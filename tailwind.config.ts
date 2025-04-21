@@ -61,7 +61,22 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+                // Futuristic cyberpunk colors
+                neon: {
+                    blue: '#1EAEDB',
+                    purple: '#8B5CF6',
+                    pink: '#D946EF',
+                    orange: '#F97316',
+                    cyan: '#33C3F0',
+                    green: '#04FCCC',
+                },
+                cyber: {
+                    dark: '#0A0F1B',
+                    darker: '#050914',
+                    light: '#1A1F2C',
+                    accent: '#221F26',
+                }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,12 +99,56 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+                // Futuristic animations
+                'glow': {
+                    '0%': { boxShadow: '0 0 5px rgba(30, 174, 219, 0.7), 0 0 10px rgba(30, 174, 219, 0.5)' },
+                    '50%': { boxShadow: '0 0 20px rgba(30, 174, 219, 0.9), 0 0 30px rgba(30, 174, 219, 0.7)' },
+                    '100%': { boxShadow: '0 0 5px rgba(30, 174, 219, 0.7), 0 0 10px rgba(30, 174, 219, 0.5)' },
+                },
+                'float': {
+                    '0%': { transform: 'translateY(0px)' },
+                    '50%': { transform: 'translateY(-10px)' },
+                    '100%': { transform: 'translateY(0px)' },
+                },
+                'pulse-neon': {
+                    '0%': { opacity: '0.8' },
+                    '50%': { opacity: '1' },
+                    '100%': { opacity: '0.8' },
+                },
+                'gradient-flow': {
+                    '0%': { backgroundPosition: '0% 50%' },
+                    '50%': { backgroundPosition: '100% 50%' },
+                    '100%': { backgroundPosition: '0% 50%' },
+                },
+                'hologram-glitch': {
+                    '0%': { opacity: '0.9', transform: 'skew(0deg)' },
+                    '2%': { opacity: '0.8', transform: 'skew(1deg)' },
+                    '4%': { opacity: '1', transform: 'skew(0deg)' },
+                    '6%': { opacity: '0.9', transform: 'skew(-1deg)' },
+                    '8%': { opacity: '1', transform: 'skew(0deg)' },
+                    '100%': { opacity: '1', transform: 'skew(0deg)' },
+                },
+                'data-scan': {
+                    '0%': { backgroundPosition: '0% 0%' },
+                    '100%': { backgroundPosition: '0% 100%' },
+                }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+                // Futuristic animations
+                'glow': 'glow 2s infinite',
+                'float': 'float 4s ease-in-out infinite',
+                'pulse-neon': 'pulse-neon 2s infinite',
+                'gradient-flow': 'gradient-flow 5s ease infinite',
+                'hologram-glitch': 'hologram-glitch 10s ease infinite',
+                'data-scan': 'data-scan 2s linear infinite'
+			},
+            backgroundSize: {
+                'flow': '200% 200%',
+                'scan': '100% 500%'
+            }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
