@@ -1,13 +1,25 @@
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { NeuralButton } from "../ui/neural-button";
 import { HologramCard } from "../ui/hologram-card";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 export function ParadoxNav() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const { subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+    supabase.auth.getSession().then(({ data }) => setIsAuthenticated(!!data.session));
+    return () => { subscription.unsubscribe(); }
+  }, []);
   
   const navItems = [
     { label: "Home", path: "/" },
@@ -64,12 +76,21 @@ export function ParadoxNav() {
           
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center gap-2">
-            <NeuralButton size="sm" variant="ghost" color="cyan">
-              Sign In
-            </NeuralButton>
-            <NeuralButton size="sm" color="blue">
-              Get Started
-            </NeuralButton>
+            {!isAuthenticated && (
+              <>
+                <NeuralButton size="sm" variant="ghost" color="cyan" onClick={() => navigate("/auth")}>
+                  Sign In
+                </NeuralButton>
+                <NeuralButton size="sm" color="blue" onClick={() => navigate("/auth")}>
+                  Get Started
+                </NeuralButton>
+              </>
+            )}
+            {isAuthenticated && (
+              <NeuralButton size="sm" color="cyan" onClick={async () => { await supabase.auth.signOut(); setIsAuthenticated(false); }}>
+                Log Out
+              </NeuralButton>
+            )}
           </div>
           
           {/* Mobile Menu Button */}
@@ -116,10 +137,10 @@ export function ParadoxNav() {
                   </Link>
                 ))}
                 <div className="border-t border-neon-blue/10 mt-2 pt-4 px-4 flex gap-2">
-                  <NeuralButton size="sm" variant="ghost" color="cyan" className="flex-1">
+                  <NeuralButton size="sm" variant="ghost" color="cyan" className="flex-1" onClick={() => { setIsOpen(false); navigate("/auth"); }}>
                     Sign In
                   </NeuralButton>
-                  <NeuralButton size="sm" color="blue" className="flex-1">
+                  <NeuralButton size="sm" color="blue" className="flex-1" onClick={() => { setIsOpen(false); navigate("/auth"); }}>
                     Get Started
                   </NeuralButton>
                 </div>

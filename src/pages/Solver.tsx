@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ParadoxNav } from "@/components/paradox-solver/nav-bar";
 import { ParadoxFooter } from "@/components/paradox-solver/footer";
 import { HologramCard } from "@/components/ui/hologram-card";
 import { NeuralButton } from "@/components/ui/neural-button";
 import { DataStream } from "@/components/ui/data-stream";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const ParadoxSolver = () => {
   const [problemInput, setProblemInput] = useState("");
@@ -12,6 +14,18 @@ const ParadoxSolver = () => {
   const [stage, setStage] = useState(0); // 0: input, 1: analyzing, 2: results
   const [solutionResult, setSolutionResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check auth on mount
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) navigate("/auth");
+    });
+    const { subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) navigate("/auth");
+    });
+    return () => { subscription.unsubscribe(); }
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +37,6 @@ const ParadoxSolver = () => {
     setSolutionResult(null);
 
     try {
-      // Call Supabase Edge Function for solution
       const response = await fetch(
         "https://syothuxkimavlcdhzklo.functions.supabase.co/generate-paradox-solution",
         {
@@ -33,12 +46,11 @@ const ParadoxSolver = () => {
         }
       );
       const data = await response.json();
-      if (data.error) throw new Error(data.error);
-      // Show Google AI's response
+      if (!response.ok || data.error) throw new Error(data.error || "Error");
       setSolutionResult(data.output || "No solution generated.");
       setStage(2);
     } catch (err: any) {
-      setError(err.message || "Unexpected error");
+      setError(err.message || "Unexpected error. Please try again or check your API key.");
       setStage(0);
     } finally {
       setLoading(false);

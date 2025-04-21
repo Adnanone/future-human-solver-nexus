@@ -1,10 +1,11 @@
-
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { DataStream } from "../ui/data-stream";
 import { NeuralButton } from "../ui/neural-button";
+import { useNavigate } from "react-router-dom";
 
 export function ParadoxFooter() {
+  const navigate = useNavigate();
   const footerLinks = [
     {
       title: "Platform",
@@ -92,10 +93,10 @@ export function ParadoxFooter() {
             </p>
             
             <div className="flex gap-4">
-              <NeuralButton size="sm" variant="ghost">
+              <NeuralButton size="sm" variant="ghost" onClick={() => navigate("/auth")}>
                 Sign In
               </NeuralButton>
-              <NeuralButton size="sm">
+              <NeuralButton size="sm" onClick={() => navigate("/auth")}>
                 Start Free Trial
               </NeuralButton>
             </div>
